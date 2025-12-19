@@ -14,7 +14,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'courses',
     'assignments',
-    'django.contrib.bootstrap5',
+    'django_bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -52,7 +52,7 @@ DATABASES = {
 }
 AUTH_PASSWORD_VALIDATORS = []
 LANGUAGE_CODE = 'uk'
-TIME_ZONE = 'Europe/Kiev'
+TIME_ZONE = 'Europe/Kyiv'
 USE_I18N = True
 USE_TZ = True
 STATIC_URL = '/static/'
