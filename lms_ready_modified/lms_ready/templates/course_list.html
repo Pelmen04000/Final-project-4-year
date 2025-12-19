@@ -1,11 +1,26 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
-<h1>Курси</h1>
-<div class="list-group">
-  {% for c in courses %}
-    <a class="list-group-item list-group-item-action" href="{% url 'course_detail' c.slug %}">{{ c.title }}</a>
-  {% empty %}
-    <p>Немає курсів.</p>
-  {% endfor %}
+
+<h2>📚 Курси</h2>
+
+{% if user.is_superuser or user.groups.all.0.name == 'teacher' %}
+<a href="{% url 'course_create' %}" class="btn btn-success mb-3">➕ Додати курс</a>
+<a href="{% url 'journal' %}" class="btn btn-secondary mb-3">📊 Журнал</a>
+{% endif %}
+
+<div class="row">
+{% for course in courses %}
+<div class="col-md-4">
+    <div class="card mb-3 shadow">
+        <div class="card-body">
+            <h5>{{ course.title }}</h5>
+            <p>{{ course.description }}</p>
+            <span class="badge bg-info">{{ course.get_priority_display }}</span><br>
+            <small>⏰ {{ course.deadline }}</small>
+        </div>
+    </div>
 </div>
+{% endfor %}
+</div>
+
 {% endblock %}
