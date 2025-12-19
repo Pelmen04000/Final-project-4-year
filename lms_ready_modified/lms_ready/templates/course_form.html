@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>{% if action == 'create' %}Создать курс{% else %}Редактировать курс{% endif %}</h2>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% if action == 'create' %}Создать{% else %}Сохранить{% endif %}</button>
+    <a href="{% url 'course_list' %}">Отмена</a>
+  </form>
+{% endblock %}

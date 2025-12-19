@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ course.title }}</h1>
+<p>{{ course.description }}</p>
+<h3>Модулі</h3>
+<ul>
+  {% for m in course.modules.all %}
+    <li>
+      <strong>{{ m.title }}</strong>
+      <ul>
+        {% for lesson in m.lessons.all %}
+          <li><a href="{% url 'lesson_detail' lesson.pk %}">{{ lesson.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </li>
+  {% empty %}
+    <li>Модулів немає.</li>
+  {% endfor %}
+</ul>
+{% if user.is_authenticated and user.profile.role in 'teacher admin' %}
+<a href="/assignments/{{ course.id }}/create/">Создать задание</a>
+{% endif %}
+{% endblock %}

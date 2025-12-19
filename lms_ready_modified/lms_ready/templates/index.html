@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Останні курси</h1>
+<div class="row">
+  {% for c in courses %}
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">{{ c.title }}</h5>
+          <p class="card-text">{{ c.description|truncatewords:20 }}</p>
+          <a href="{% url 'course_detail' c.slug %}" class="btn btn-primary">Переглянути</a>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <p>Немає курсів.</p>
+  {% endfor %}
+</div>
+{% endblock %}

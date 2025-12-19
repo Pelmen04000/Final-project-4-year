@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Курси</h1>
+<div class="list-group">
+  {% for c in courses %}
+    <a class="list-group-item list-group-item-action" href="{% url 'course_detail' c.slug %}">{{ c.title }}</a>
+  {% empty %}
+    <p>Немає курсів.</p>
+  {% endfor %}
+</div>
+{% endblock %}

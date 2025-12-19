@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ lesson.title }}</h1>
+<div>{{ lesson.content|linebreaks }}</div>
+<hr>
+<h4>Завдання</h4>
+<ul>
+  {% for a in lesson.assignments.all %}
+    <li>{{ a.title }} — {% if a.due_date %}До: {{ a.due_date }}{% else %}Без терміну{% endif %}</li>
+  {% empty %}
+    <li>Немає завдань.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
