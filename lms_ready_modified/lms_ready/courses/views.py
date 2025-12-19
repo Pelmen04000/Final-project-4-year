@@ -1,59 +1,55 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
-from .models import Course
-from .forms import CourseForm
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import User, Group
+from .models import Course, Grade
+from .utils import is_teacher_or_admin
 
-def user_is_teacher_or_admin(user):
-    try:
-        role = getattr(user, 'profile').role
-    except Exception:
-        role = None
-    return role in ('teacher', 'admin')
+def register(request):
+    if request.method == 'POST':
+        user = User.objects.create_user(
+            username=request.POST['username'],
+            password=request.POST['password']
+        )
+        group, _ = Group.objects.get_or_create(name='student')
+        user.groups.add(group)
+        return redirect('login')
+    return render(request, 'auth/register.html')
 
+
+@login_required
 def course_list(request):
-    courses = Course.objects.all()
-    return render(request, 'course_list.html', {'courses': courses})
+    return render(request, 'courses/course_list.html', {
+        'courses': Course.objects.all()
+    })
 
-def course_detail(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
-    return render(request, 'course_detail.html', {'course': course})
 
 @login_required
+@user_passes_test(is_teacher_or_admin)
 def course_create(request):
-    if not user_is_teacher_or_admin(request.user):
-        return HttpResponseForbidden("Только teacher или admin могут создавать курс.")
     if request.method == 'POST':
-        form = CourseForm(request.POST, request.FILES or None)
-        if form.is_valid():
-            course = form.save(commit=False)
-            
-            course.save()
-            return redirect('course_detail', course_id=course.id)
-    else:
-        form = CourseForm()
-    return render(request, 'course_form.html', {'form': form, 'action': 'create'})
-
-@login_required
-def course_edit(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
-    if not user_is_teacher_or_admin(request.user):
-        return HttpResponseForbidden("Только teacher или admin могут редактировать курс.")
-    if request.method == 'POST':
-        form = CourseForm(request.POST, request.FILES or None, instance=course)
-        if form.is_valid():
-            form.save()
-            return redirect('course_detail', course_id=course.id)
-    else:
-        form = CourseForm(instance=course)
-    return render(request, 'course_form.html', {'form': form, 'action': 'edit', 'course': course})
-
-@login_required
-def course_delete(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
-    if not user_is_teacher_or_admin(request.user):
-        return HttpResponseForbidden("Только teacher или admin могут удалять курс.")
-    if request.method == 'POST':
-        course.delete()
+        Course.objects.create(
+            title=request.POST['title'],
+            description=request.POST['description'],
+            priority=request.POST['priority'],
+            deadline=request.POST['deadline'],
+            created_by=request.user
+        )
         return redirect('course_list')
-    return render(request, 'course_confirm_delete.html', {'course': course})
+    return render(request, 'courses/course_form.html')
+
+
+@login_required
+@user_passes_test(is_teacher_or_admin)
+def journal(request):
+    if request.method == 'POST':
+        Grade.objects.update_or_create(
+            student_id=request.POST['student'],
+            course_id=request.POST['course'],
+            defaults={'value': request.POST['grade']}
+        )
+
+    return render(request, 'courses/journal.html', {
+        'grades': Grade.objects.all(),
+        'students': User.objects.filter(groups__name='student'),
+        'courses': Course.objects.all()
+    })
